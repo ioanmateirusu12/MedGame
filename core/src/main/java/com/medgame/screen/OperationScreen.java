@@ -231,8 +231,9 @@ public class OperationScreen extends BaseScreen {
                 String name = s != null ? s.name : structureId;
                 if (discoveryLabel != null)
                     discoveryLabel.setText("Discovered: " + name + "!");
-                // Reveal entity
                 revealEntity(structureId);
+                // Add to persistent collection
+                game.collection.discover(structureId);
             }
 
             @Override
@@ -245,6 +246,9 @@ public class OperationScreen extends BaseScreen {
                 showResult = true;
                 operationSuccess = success;
                 finalScore = score;
+                // Persist any newly discovered structures
+                for (String id : discovered) game.collection.discover(id);
+                game.saveCollection();
                 updateResultUI(success, score, discovered);
             }
         });
