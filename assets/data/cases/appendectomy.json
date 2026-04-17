@@ -1,0 +1,222 @@
+{
+  "id": "appendectomy_01",
+  "displayName": "Acute Appendicitis",
+  "description": "A 22-year-old male presents to the emergency department with 12 hours of periumbilical pain that has migrated to the right iliac fossa, associated with fever (38.2°C) and elevated WBC (14,000). Ultrasound confirms acute appendicitis without perforation. Proceed with laparoscopic appendectomy.",
+  "difficulty": 1,
+  "estimatedDurationMinutes": 20,
+  "minPlayers": 1,
+  "maxPlayers": 4,
+  "requiredRoles": ["SURGEON"],
+  "optionalRoles": ["ASSISTANT", "ANESTHESIOLOGIST", "SCRUB_NURSE"],
+  "region": "abdomen",
+  "surgicalApproach": "laparoscopic",
+  "patientProfile": {
+    "age": 22,
+    "sex": "male",
+    "weight": 75,
+    "comorbidities": [],
+    "baselineHeartRate": 95,
+    "baselineBloodPressure": "120/80",
+    "baselineOxygenSat": 98
+  },
+  "phases": [
+    {
+      "id": "prep",
+      "displayName": "Patient Preparation & Anaesthesia",
+      "phase": "PREP",
+      "requiredRole": "ANESTHESIOLOGIST",
+      "steps": [
+        {
+          "id": "intubation",
+          "instruction": "Secure the airway with rapid sequence induction and endotracheal intubation",
+          "action": "INTUBATE",
+          "targetStructure": "trachea",
+          "toolRequired": "LARYNGOSCOPE",
+          "successCondition": "precision >= 0.7",
+          "hint": "Position the patient with neck slightly extended. Identify vocal cords before advancing the tube.",
+          "discoversStructure": null,
+          "revealStructures": [],
+          "onSuccess": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 5 },
+          "onFailure": { "heartRate": 15, "bloodPressure": 0, "oxygenSat": -10 },
+          "canRetry": true
+        }
+      ]
+    },
+    {
+      "id": "incision",
+      "displayName": "Port Placement",
+      "phase": "INCISION",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "umbilical_port",
+          "instruction": "Make a 10mm infraumbilical incision through the linea alba and place the umbilical port for the camera",
+          "action": "INCISE",
+          "targetStructure": "linea_alba",
+          "toolRequired": "SCALPEL",
+          "successCondition": "precision >= 0.6",
+          "hint": "The linea alba is avascular - stay in the midline to avoid the inferior epigastric vessels.",
+          "discoversStructure": "linea_alba",
+          "revealStructures": ["rectus_abdominis", "linea_alba"],
+          "onSuccess": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 0 },
+          "onFailure": { "heartRate": 0, "bloodPressure": 10, "oxygenSat": 0 },
+          "canRetry": true
+        },
+        {
+          "id": "working_ports",
+          "instruction": "Place two 5mm working ports under direct vision, lateral to the inferior epigastric vessels",
+          "action": "INCISE",
+          "targetStructure": "anterior_abdominal_wall",
+          "toolRequired": "TROCAR",
+          "successCondition": "precision >= 0.6",
+          "hint": "Transilluminate the abdominal wall to identify inferior epigastric vessels before port placement.",
+          "discoversStructure": "inferior_epigastric_artery",
+          "revealStructures": ["inferior_epigastric_artery"],
+          "onSuccess": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 0 },
+          "onFailure": { "heartRate": 20, "bloodPressure": 25, "oxygenSat": -5 },
+          "canRetry": true
+        }
+      ]
+    },
+    {
+      "id": "dissection",
+      "displayName": "Identify and Mobilise Appendix",
+      "phase": "DISSECTION",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "identify_cecum",
+          "instruction": "Navigate to the right iliac fossa and identify the cecum",
+          "action": "IDENTIFY",
+          "targetStructure": "cecum",
+          "toolRequired": "CAMERA",
+          "successCondition": "precision >= 0.5",
+          "hint": "The cecum is in the right lower quadrant. It has taeniae coli converging toward the appendix base.",
+          "discoversStructure": "cecum",
+          "revealStructures": ["cecum", "terminal_ileum"],
+          "onSuccess": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 0 },
+          "onFailure": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 0 },
+          "canRetry": true
+        },
+        {
+          "id": "identify_appendix",
+          "instruction": "Follow the anterior taenia coli to the base of the appendix. Confirm the diagnosis.",
+          "action": "IDENTIFY",
+          "targetStructure": "appendix",
+          "toolRequired": "FORCEPS",
+          "successCondition": "precision >= 0.5",
+          "hint": "The three taeniae coli converge at the base of the appendix. The appendix may be retrocecal - check behind the cecum.",
+          "discoversStructure": "appendix",
+          "revealStructures": ["appendix", "mesoappendix"],
+          "onSuccess": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 0 },
+          "onFailure": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 0 },
+          "canRetry": true
+        },
+        {
+          "id": "divide_mesoappendix",
+          "instruction": "Divide the mesoappendix, securing the appendicular artery with clips",
+          "action": "LIGATE",
+          "targetStructure": "mesoappendix",
+          "toolRequired": "CLIP_APPLIER",
+          "successCondition": "precision >= 0.65",
+          "hint": "Apply two clips proximally and one distally on the appendicular artery before division. Ensure haemostasis.",
+          "discoversStructure": "appendicular_artery",
+          "revealStructures": ["appendicular_artery", "ileocolic_artery"],
+          "onSuccess": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 0 },
+          "onFailure": { "heartRate": 20, "bloodPressure": 30, "oxygenSat": -3 },
+          "canRetry": false
+        }
+      ]
+    },
+    {
+      "id": "procedure",
+      "displayName": "Appendix Removal",
+      "phase": "PROCEDURE",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "staple_base",
+          "instruction": "Apply an endostapler across the base of the appendix, flush with the cecum",
+          "action": "STAPLE",
+          "targetStructure": "appendix",
+          "toolRequired": "ENDOSTAPLER",
+          "successCondition": "precision >= 0.75",
+          "hint": "Ensure there is adequate clearance from the cecal wall to prevent a cecal fistula. Compress the stapler fully before firing.",
+          "discoversStructure": null,
+          "revealStructures": [],
+          "onSuccess": { "heartRate": -5, "bloodPressure": -5, "oxygenSat": 0 },
+          "onFailure": { "heartRate": 25, "bloodPressure": 30, "oxygenSat": -5 },
+          "canRetry": false
+        },
+        {
+          "id": "extract_specimen",
+          "instruction": "Place the appendix in a retrieval bag and extract through the umbilical port",
+          "action": "EXTRACT",
+          "targetStructure": "appendix",
+          "toolRequired": "RETRIEVAL_BAG",
+          "successCondition": "precision >= 0.5",
+          "hint": "Use a retrieval bag to prevent contamination of the port site from the inflamed appendix.",
+          "discoversStructure": null,
+          "revealStructures": [],
+          "onSuccess": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 0 },
+          "onFailure": { "heartRate": 10, "bloodPressure": 10, "oxygenSat": 0 },
+          "canRetry": true
+        }
+      ]
+    },
+    {
+      "id": "closure",
+      "displayName": "Washout and Closure",
+      "phase": "CLOSURE",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "washout",
+          "instruction": "Irrigate the right iliac fossa with warm saline and check for haemostasis",
+          "action": "IRRIGATE",
+          "targetStructure": "peritoneum",
+          "toolRequired": "IRRIGATOR",
+          "successCondition": "precision >= 0.5",
+          "hint": "Check the stump, mesoappendix stump, and right iliac fossa for any bleeding or bile staining.",
+          "discoversStructure": "right_ureter",
+          "revealStructures": ["right_ureter"],
+          "onSuccess": { "heartRate": -5, "bloodPressure": -5, "oxygenSat": 2 },
+          "onFailure": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 0 },
+          "canRetry": true
+        },
+        {
+          "id": "port_closure",
+          "instruction": "Close the fascial defect at the umbilical port with absorbable suture",
+          "action": "SUTURE",
+          "targetStructure": "linea_alba",
+          "toolRequired": "SUTURE",
+          "successCondition": "precision >= 0.6",
+          "hint": "The 10mm fascial defect must be closed to prevent port-site hernia. Use a J-needle or closure device.",
+          "discoversStructure": null,
+          "revealStructures": [],
+          "onSuccess": { "heartRate": -10, "bloodPressure": -10, "oxygenSat": 0 },
+          "onFailure": { "heartRate": 0, "bloodPressure": 0, "oxygenSat": 0 },
+          "canRetry": true
+        }
+      ]
+    }
+  ],
+  "discoveryOpportunities": [
+    "appendix",
+    "appendicular_artery",
+    "mesoappendix",
+    "cecum",
+    "terminal_ileum",
+    "rectus_abdominis",
+    "linea_alba",
+    "inferior_epigastric_artery",
+    "ileocolic_artery",
+    "right_ureter"
+  ],
+  "completionRewards": {
+    "baseScore": 1000,
+    "perfectBonus": 500
+  },
+  "prerequisites": [],
+  "nextCases": ["cholecystectomy_01", "inguinal_hernia_01"]
+}

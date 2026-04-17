@@ -1,0 +1,165 @@
+{
+  "id": "inguinal_hernia_01",
+  "displayName": "Inguinal Hernia Repair",
+  "description": "A 58-year-old man presents with a reducible right groin swelling that appears on straining and reduces on lying. Examination confirms a direct inguinal hernia above the inguinal ligament medial to the inferior epigastric vessels. Lichtenstein tension-free mesh repair is planned.",
+  "difficulty": 2,
+  "minPlayers": 1,
+  "maxPlayers": 4,
+  "requiredRoles": ["SURGEON"],
+  "optionalRoles": ["ASSISTANT", "ANESTHESIOLOGIST", "SCRUB_NURSE"],
+  "region": "abdomen",
+  "patientProfile": {
+    "age": 58,
+    "sex": "M",
+    "weight": 84,
+    "baselineHeartRate": 76,
+    "baselineBloodPressure": 138,
+    "baselineOxygenSat": 98,
+    "comorbidities": ["BPH", "chronic_cough_COPD"]
+  },
+  "phases": [
+    {
+      "id": "skin_incision",
+      "phase": "INCISION",
+      "displayName": "Skin Incision",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "groin_incision",
+          "action": "INCISE",
+          "targetStructure": "skin_groin",
+          "toolRequired": "SCALPEL",
+          "successCondition": "precision >= 0.55",
+          "revealStructures": ["external_oblique", "superficial_external_pudendal_artery"],
+          "description": "Skin crease incision 2 cm above and parallel to the medial two-thirds of the inguinal ligament. Divide Scarpa's fascia. Achieve haemostasis with diathermy."
+        }
+      ]
+    },
+    {
+      "id": "inguinal_canal",
+      "phase": "DISSECTION",
+      "displayName": "Opening Inguinal Canal",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "open_external_oblique",
+          "action": "INCISE",
+          "targetStructure": "external_oblique",
+          "toolRequired": "SCISSORS",
+          "successCondition": "precision >= 0.6",
+          "revealStructures": ["inguinal_canal", "ilioinguinal_nerve", "inguinal_ligament"],
+          "description": "Divide external oblique aponeurosis along its fibres from the external ring. Identify and preserve the ilioinguinal nerve."
+        },
+        {
+          "id": "identify_cord",
+          "action": "RETRACT",
+          "targetStructure": "spermatic_cord",
+          "toolRequired": "RETRACTOR",
+          "successCondition": "precision >= 0.55",
+          "revealStructures": ["spermatic_cord", "cremasteric_fascia", "inferior_epigastric_vessels"],
+          "description": "Mobilise the spermatic cord at the pubic tubercle. Encircle with a soft Penrose drain. Identify inferior epigastric vessels medially — direct hernia lies medial, indirect lies lateral."
+        }
+      ]
+    },
+    {
+      "id": "hernia_sac",
+      "phase": "DISSECTION",
+      "displayName": "Hernia Sac Dissection",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "dissect_sac",
+          "action": "DISSECT",
+          "targetStructure": "hernia_sac",
+          "toolRequired": "SCISSORS",
+          "successCondition": "precision >= 0.65",
+          "revealStructures": ["transversalis_fascia", "deep_inguinal_ring"],
+          "description": "For direct hernia: invaginate the sac with a continuous purse-string suture into the preperitoneal space. For indirect: dissect sac off cord structures to the neck at deep ring. Divide and ligate if small, or reduce if large."
+        },
+        {
+          "id": "inspect_posterior_wall",
+          "action": "INSPECT",
+          "targetStructure": "transversalis_fascia",
+          "toolRequired": "RETRACTOR",
+          "successCondition": "precision >= 0.5",
+          "revealStructures": ["conjoint_tendon", "inguinal_ligament", "femoral_ring"],
+          "description": "Inspect the posterior inguinal wall (transversalis fascia). Confirm the direct defect in Hesselbach's triangle. Check femoral ring for concurrent femoral hernia."
+        }
+      ]
+    },
+    {
+      "id": "mesh_placement",
+      "phase": "REPAIR",
+      "displayName": "Lichtenstein Mesh Repair",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "place_mesh",
+          "action": "SUTURE",
+          "targetStructure": "inguinal_ligament",
+          "toolRequired": "NEEDLE_DRIVER",
+          "successCondition": "precision >= 0.70",
+          "revealStructures": [],
+          "description": "Place a 7x15cm polypropylene mesh extending 2 cm medial to pubic tubercle. Suture medial end to pubic tubercle periosteum with non-absorbable suture. Suture inferior edge to inguinal ligament with running suture to the deep ring."
+        },
+        {
+          "id": "secure_mesh",
+          "action": "SUTURE",
+          "targetStructure": "conjoint_tendon",
+          "toolRequired": "NEEDLE_DRIVER",
+          "successCondition": "precision >= 0.70",
+          "revealStructures": [],
+          "description": "Tack superior edge of mesh to conjoint tendon/internal oblique with interrupted sutures. Create a tailored slit in the mesh for the spermatic cord; overlap the two tails at the deep ring and fix with sutures."
+        }
+      ]
+    },
+    {
+      "id": "closure",
+      "phase": "CLOSURE",
+      "displayName": "Wound Closure",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "close_external_oblique",
+          "action": "SUTURE",
+          "targetStructure": "external_oblique",
+          "toolRequired": "NEEDLE_DRIVER",
+          "successCondition": "precision >= 0.55",
+          "revealStructures": [],
+          "description": "Close external oblique aponeurosis over the cord with a continuous absorbable suture, recreating the external ring. Ensure ilioinguinal nerve is not trapped."
+        },
+        {
+          "id": "close_skin",
+          "action": "SUTURE",
+          "targetStructure": "skin_groin",
+          "toolRequired": "NEEDLE_DRIVER",
+          "successCondition": "precision >= 0.5",
+          "revealStructures": [],
+          "description": "Close Scarpa's fascia with interrupted absorbable sutures. Subcuticular skin closure with absorbable monofilament. Apply Steri-strips and dressing."
+        }
+      ]
+    }
+  ],
+  "discoveryOpportunities": [
+    "inguinal_ligament",
+    "external_oblique",
+    "spermatic_cord",
+    "ilioinguinal_nerve",
+    "inferior_epigastric_vessels",
+    "transversalis_fascia",
+    "conjoint_tendon",
+    "deep_inguinal_ring",
+    "femoral_ring",
+    "rectus_abdominis"
+  ],
+  "learningObjectives": [
+    "Identify the boundaries of Hesselbach's triangle (direct hernia)",
+    "Distinguish direct vs indirect inguinal hernia using inferior epigastric vessels",
+    "Understand the layers of the inguinal canal",
+    "Perform tension-free Lichtenstein repair with correct mesh fixation",
+    "Identify and preserve the ilioinguinal nerve"
+  ],
+  "prerequisites": ["cholecystectomy_01"],
+  "nextCases": [],
+  "maxScore": 1100
+}
