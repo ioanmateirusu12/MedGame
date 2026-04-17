@@ -1,0 +1,174 @@
+{
+  "id": "cholecystectomy_01",
+  "displayName": "Acute Cholecystitis",
+  "description": "A 45-year-old woman presents with right upper quadrant pain radiating to the right shoulder, fever, and a positive Murphy's sign. Ultrasound confirms acute cholecystitis with cholelithiasis. Laparoscopic cholecystectomy is indicated.",
+  "difficulty": 2,
+  "minPlayers": 1,
+  "maxPlayers": 4,
+  "requiredRoles": ["SURGEON"],
+  "optionalRoles": ["ASSISTANT", "ANESTHESIOLOGIST", "SCRUB_NURSE"],
+  "region": "abdomen",
+  "patientProfile": {
+    "age": 45,
+    "sex": "F",
+    "weight": 72,
+    "baselineHeartRate": 92,
+    "baselineBloodPressure": 130,
+    "baselineOxygenSat": 98,
+    "comorbidities": ["cholelithiasis", "obesity_bmi_28"]
+  },
+  "phases": [
+    {
+      "id": "port_placement",
+      "phase": "INCISION",
+      "displayName": "Port Placement",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "umbilical_port",
+          "action": "INCISE",
+          "targetStructure": "umbilicus",
+          "toolRequired": "SCALPEL",
+          "successCondition": "precision >= 0.55",
+          "revealStructures": ["rectus_abdominis", "linea_alba"],
+          "description": "Make a 10mm infraumbilical incision for the camera port. Enter peritoneal cavity with Hasson technique."
+        },
+        {
+          "id": "insufflation",
+          "action": "RETRACT",
+          "targetStructure": "peritoneal_cavity",
+          "toolRequired": "RETRACTOR",
+          "successCondition": "precision >= 0.4",
+          "revealStructures": ["liver", "gallbladder"],
+          "description": "Insufflate abdomen with CO2 to 12 mmHg. Insert 30-degree laparoscope. Place three 5mm working ports."
+        }
+      ]
+    },
+    {
+      "id": "calot_dissection",
+      "phase": "DISSECTION",
+      "displayName": "Calot's Triangle Dissection",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "retract_fundus",
+          "action": "RETRACT",
+          "targetStructure": "gallbladder",
+          "toolRequired": "RETRACTOR",
+          "successCondition": "precision >= 0.5",
+          "revealStructures": ["cystic_duct", "hepatoduodenal_ligament"],
+          "description": "Retract gallbladder fundus superiorly. Expose the hepatocystic triangle (Calot's triangle)."
+        },
+        {
+          "id": "dissect_calot",
+          "action": "DISSECT",
+          "targetStructure": "cystic_duct",
+          "toolRequired": "SCISSORS",
+          "successCondition": "precision >= 0.65",
+          "revealStructures": ["cystic_artery", "right_hepatic_artery", "common_bile_duct"],
+          "description": "Dissect the peritoneum overlying Calot's triangle. Achieve Critical View of Safety (CVS): two structures seen entering gallbladder — cystic duct and cystic artery only."
+        },
+        {
+          "id": "clip_cystic_artery",
+          "action": "LIGATE",
+          "targetStructure": "cystic_artery",
+          "toolRequired": "CLIP_APPLIER",
+          "successCondition": "precision >= 0.7",
+          "revealStructures": [],
+          "description": "Apply two clips proximally and one distally on cystic artery. Divide between clips. Confirm haemostasis."
+        }
+      ]
+    },
+    {
+      "id": "duct_management",
+      "phase": "LIGATION",
+      "displayName": "Cystic Duct Management",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "cholangiogram",
+          "action": "INSPECT",
+          "targetStructure": "cystic_duct",
+          "toolRequired": "RETRACTOR",
+          "successCondition": "precision >= 0.45",
+          "revealStructures": ["common_hepatic_duct", "hepatic_ducts"],
+          "description": "Optional intraoperative cholangiogram to delineate biliary anatomy. Clip catheter in cystic duct; inject contrast."
+        },
+        {
+          "id": "clip_cystic_duct",
+          "action": "LIGATE",
+          "targetStructure": "cystic_duct",
+          "toolRequired": "CLIP_APPLIER",
+          "successCondition": "precision >= 0.75",
+          "revealStructures": [],
+          "description": "Apply double clips proximally and one clip distally on cystic duct. Divide between clips. Ensure no stone impacted in duct."
+        }
+      ]
+    },
+    {
+      "id": "dissection_fossa",
+      "phase": "DISSECTION",
+      "displayName": "Gallbladder Fossa Dissection",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "peel_gallbladder",
+          "action": "DISSECT",
+          "targetStructure": "gallbladder",
+          "toolRequired": "HOOK_DIATHERMY",
+          "successCondition": "precision >= 0.65",
+          "revealStructures": ["liver_bed", "hepatic_veins"],
+          "description": "Use hook diathermy to dissect gallbladder from liver bed. Stay in the correct avascular plane. Control bleeding."
+        }
+      ]
+    },
+    {
+      "id": "retrieval_closure",
+      "phase": "CLOSURE",
+      "displayName": "Retrieval and Closure",
+      "requiredRole": "SURGEON",
+      "steps": [
+        {
+          "id": "bag_extraction",
+          "action": "RETRACT",
+          "targetStructure": "gallbladder",
+          "toolRequired": "RETRACTOR",
+          "successCondition": "precision >= 0.5",
+          "revealStructures": [],
+          "description": "Place gallbladder in retrieval bag. Morcellate if needed and extract through umbilical port. Check for bile spillage and wash out any spilled stones."
+        },
+        {
+          "id": "port_closure",
+          "action": "SUTURE",
+          "targetStructure": "rectus_abdominis",
+          "toolRequired": "NEEDLE_DRIVER",
+          "successCondition": "precision >= 0.55",
+          "revealStructures": [],
+          "description": "Close 10mm port fascia with J-needle and absorbable suture. Deflate pneumoperitoneum. Close skin ports with subcuticular sutures."
+        }
+      ]
+    }
+  ],
+  "discoveryOpportunities": [
+    "gallbladder",
+    "cystic_duct",
+    "cystic_artery",
+    "common_bile_duct",
+    "right_hepatic_artery",
+    "common_hepatic_duct",
+    "liver",
+    "hepatoduodenal_ligament",
+    "rectus_abdominis",
+    "linea_alba"
+  ],
+  "learningObjectives": [
+    "Identify Calot's triangle boundaries and contents",
+    "Achieve Critical View of Safety before clipping",
+    "Recognise aberrant right hepatic artery arising from cystic artery",
+    "Understand bile duct injury risk and prevention",
+    "Perform safe laparoscopic dissection technique"
+  ],
+  "prerequisites": ["appendectomy_01"],
+  "nextCases": ["inguinal_hernia_01"],
+  "maxScore": 1000
+}
