@@ -1,0 +1,16 @@
+.gradle/
+build/
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+local.properties
+android/local.properties
+android/.gradle/
+android/build/
+core/build/
+desktop/build/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
