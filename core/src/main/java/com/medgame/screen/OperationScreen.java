@@ -35,6 +35,11 @@ import com.medgame.surgery.SurgicalAction;
 import com.medgame.surgery.SurgicalPhase;
 import com.medgame.surgery.Tool;
 
+import com.medgame.network.NetworkManager;
+import com.medgame.network.packet.SyncTickPacket;
+
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,6 +49,7 @@ public class OperationScreen extends BaseScreen {
     private Engine engine;
     private EntityFactory entityFactory;
     private Entity playerToolEntity;
+    private final Entity[] remoteToolEntities = new Entity[4];
 
     // Rendering
     private SpriteBatch batch;
@@ -53,7 +59,10 @@ public class OperationScreen extends BaseScreen {
 
     // Game logic
     private final ClinicalCase clinicalCase;
-    private final OperationDirector director;
+    private final SpecialistRole localRole;
+    private final boolean isHost;
+    private final int localSlot;
+    private OperationDirector director;
     private final RoleController roleController;
 
     // HUD labels (updated each frame)
@@ -74,20 +83,39 @@ public class OperationScreen extends BaseScreen {
     private boolean operationSuccess = false;
     private int finalScore = 0;
 
+    // Convenience constructor for single-player
     public OperationScreen(MedGame game, ClinicalCase clinicalCase) {
+        this(game, clinicalCase, SpecialistRole.SURGEON, true, 0);
+    }
+
+    public OperationScreen(MedGame game, ClinicalCase clinicalCase,
+                           SpecialistRole role, boolean isHost, int localSlot) {
         super(game);
         this.clinicalCase = clinicalCase;
+        this.localRole = role;
+        this.isHost = isHost;
+        this.localSlot = localSlot;
         this.batch = new SpriteBatch();
         this.shapeRenderer = new ShapeRenderer();
 
-        director = new OperationDirector();
-        roleController = new RoleController(SpecialistRole.SURGEON, camera);
+        roleController = new RoleController(localRole, camera);
 
         setupECS();
-        setupOperationDirector();
+
+        // Only host runs the authoritative OperationDirector
+        if (isHost) {
+            director = new OperationDirector();
+            setupOperationDirector();
+        }
+
         populateOperatingTable();
 
-        director.startOperation(clinicalCase);
+        // Client registers sync listener
+        if (!isHost && game.networkManager.isClient()) {
+            setupClientSync();
+        }
+
+        if (isHost && director != null) director.startOperation(clinicalCase);
     }
 
     private void setupECS() {
@@ -112,14 +140,74 @@ public class OperationScreen extends BaseScreen {
 
         // Wire role controller
         roleController.setListener((action, tool, pos) -> {
-            // Find which structure the tool is hovering
             String targetId = getHoveredStructureId();
             if (targetId == null) return;
             Entity te = playerToolEntity;
             if (te == null) return;
             SurgicalToolComponent stc = te.getComponent(SurgicalToolComponent.class);
             float precision = stc != null ? stc.precision : 0f;
-            director.submitAction(action, targetId, tool, precision);
+
+            if (isHost && director != null) {
+                director.submitAction(action, targetId, tool, precision);
+                if (game.networkManager.isHost())
+                    game.networkManager.getServer().setHostToolPosition(pos.x, pos.y);
+            } else if (!isHost && game.networkManager.isClient()) {
+                game.networkManager.getClient().sendAction(
+                    action.name(), targetId, tool.name(), pos.x, pos.y, precision);
+            }
+        });
+    }
+
+    private void setupClientSync() {
+        game.networkManager.setClientListener(new com.medgame.network.GameClient.ClientListener() {
+            @Override public void onConnected(int slot) {}
+            @Override public void onDisconnected(String reason) {}
+            @Override public void onLobbyState(com.medgame.network.packet.LobbyStatePacket pkt) {}
+            @Override public void onGameStart(com.medgame.network.packet.GameStartPacket pkt) {}
+
+            @Override
+            public void onSyncTick(SyncTickPacket pkt) {
+                updateVitalsUI(pkt.heartRate, pkt.bloodPressure, pkt.oxygenSat);
+                if (scoreLabel != null) scoreLabel.setText("Score: " + pkt.score);
+                if (phaseLabel != null) phaseLabel.setText("Phase: " + pkt.currentPhaseId);
+                // Reveal structures
+                if (pkt.revealedStructures != null && !pkt.revealedStructures.isEmpty()) {
+                    for (String id : pkt.revealedStructures.split(",")) {
+                        revealEntity(id.trim());
+                    }
+                }
+                // Update remote tool positions
+                for (int i = 0; i < 4; i++) {
+                    if (i == localSlot) continue;
+                    if (remoteToolEntities[i] != null) {
+                        TransformComponent t = remoteToolEntities[i].getComponent(TransformComponent.class);
+                        if (t != null) { t.position.x = pkt.toolPosX[i]; t.position.y = pkt.toolPosY[i]; }
+                    }
+                }
+            }
+
+            @Override
+            public void onStructureDiscovered(com.medgame.network.packet.StructureDiscoveredPacket pkt) {
+                revealEntity(pkt.structureId);
+                AnatomicalStructure s = game.anatomyDatabase.getById(pkt.structureId);
+                if (discoveryLabel != null && s != null)
+                    discoveryLabel.setText("Discovered: " + s.name + "!");
+            }
+
+            @Override
+            public void onCaseComplete(com.medgame.network.packet.CaseCompletePacket pkt) {
+                showResult = true;
+                operationSuccess = pkt.success;
+                finalScore = pkt.score;
+                updateResultUI(pkt.success, pkt.score,
+                    new HashSet<>(Arrays.asList(pkt.discoveredStructureIds != null
+                        ? pkt.discoveredStructureIds : new String[0])));
+            }
+
+            @Override
+            public void onPhaseChange(com.medgame.network.packet.PhaseChangePacket pkt) {
+                if (phaseLabel != null) phaseLabel.setText("Phase: " + pkt.newPhase);
+            }
         });
     }
 
@@ -187,7 +275,18 @@ public class OperationScreen extends BaseScreen {
 
         // Player tool (surgeon cursor)
         playerToolEntity = entityFactory.createPlayerTool(
-            0, SpecialistRole.SURGEON, Tool.SCALPEL, 640, 360, true);
+            localSlot, localRole, Tool.SCALPEL, 640, 360, true);
+
+        // Create ghost entities for remote players (visible as colored dots)
+        SpecialistRole[] remoteRoles = {
+            SpecialistRole.SURGEON, SpecialistRole.ASSISTANT,
+            SpecialistRole.ANESTHESIOLOGIST, SpecialistRole.SCRUB_NURSE
+        };
+        for (int i = 0; i < 4; i++) {
+            if (i == localSlot) continue;
+            remoteToolEntities[i] = entityFactory.createPlayerTool(
+                i, remoteRoles[i], Tool.FORCEPS, -100, -100, false);
+        }
     }
 
     @Override
@@ -264,6 +363,9 @@ public class OperationScreen extends BaseScreen {
 
     @Override
     protected void update(float delta) {
+        // Poll network (host advances server; client drains inbound queue)
+        game.networkManager.update(delta);
+
         if (!showResult) {
             roleController.update(delta);
 
@@ -276,18 +378,17 @@ public class OperationScreen extends BaseScreen {
 
             engine.update(delta);
 
-            // Update score
-            if (scoreLabel != null)
-                scoreLabel.setText("Score: " + director.getScore());
-
             // Update tool label
             int ti = roleController.getSelectedToolIndex();
             Tool[] tools = roleController.getAvailableTools();
             if (tools.length > 0 && ti < tools.length && toolLabel != null)
                 toolLabel.setText("Tool: " + tools[ti].name() + "  [1-8]");
 
-            // Decay discovery notification
-            updateVitalsUI(director.heartRate, director.bloodPressure, director.oxygenSat);
+            // Host updates vitals from local director; client gets them via SyncTickPacket
+            if (director != null) {
+                updateVitalsUI(director.heartRate, director.bloodPressure, director.oxygenSat);
+                if (scoreLabel != null) scoreLabel.setText("Score: " + director.getScore());
+            }
         }
     }
 

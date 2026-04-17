@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.medgame.data.AnatomyDatabase;
 import com.medgame.data.CaseDatabase;
+import com.medgame.network.NetworkManager;
 import com.medgame.screen.LoadingScreen;
 import com.medgame.util.Assets;
 import com.medgame.util.SaveManager;
@@ -18,6 +19,7 @@ public class MedGame extends Game {
     public AnatomyDatabase anatomyDatabase;
     public CaseDatabase caseDatabase;
     public SaveManager saveManager;
+    public NetworkManager networkManager;
 
     public static MedGame getInstance() {
         return instance;
@@ -31,6 +33,7 @@ public class MedGame extends Game {
         saveManager = new SaveManager();
         anatomyDatabase = new AnatomyDatabase();
         caseDatabase = new CaseDatabase();
+        networkManager = new NetworkManager();
 
         setScreen(new LoadingScreen(this));
     }
@@ -52,5 +55,6 @@ public class MedGame extends Game {
     public void dispose() {
         super.dispose();
         assets.dispose();
+        if (networkManager != null) networkManager.stopAll();
     }
 }

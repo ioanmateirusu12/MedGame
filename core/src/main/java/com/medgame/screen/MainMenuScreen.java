@@ -45,11 +45,13 @@ public class MainMenuScreen extends BaseScreen {
 
         root.add(new Label("MEDGAME", labelStyle)).padBottom(60).row();
 
-        addMenuButton(root, "PLAY", buttonStyle, () -> {
+        addMenuButton(root, "PLAY (SOLO)", buttonStyle, () -> {
             com.medgame.model.ClinicalCase firstCase = game.caseDatabase.getByDifficulty(1)
                 .stream().findFirst().orElse(null);
             game.setScreen(new OperationScreen(game, firstCase));
         });
+        addMenuButton(root, "MULTIPLAYER", buttonStyle, () ->
+            game.setScreen(new LobbyScreen(game)));
         addMenuButton(root, "COLLECTION", buttonStyle, () -> game.setScreen(new CollectionScreen(game)));
         addMenuButton(root, "ATLAS", buttonStyle, () -> game.setScreen(new AtlasScreen(game)));
         addMenuButton(root, "EXIT", buttonStyle, () -> Gdx.app.exit());
